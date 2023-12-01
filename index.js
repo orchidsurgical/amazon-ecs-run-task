@@ -92,7 +92,7 @@ async function run() {
     // Get inputs
     const taskDefinitionFile = core.getInput('task-definition', { required: true });
     const cluster = core.getInput('cluster', { required: true });
-    const count = core.getInput('count', { required: false }) || 1;;
+    const count = core.getInput('count', { required: false }) || 1;
     const launchType = core.getInput('launch-type', { required: false }) || "FARGATE";
     const networkConfig = core.getInput('network-configuration', { required: false }) || null;
     const startedBy = core.getInput('started-by', { required: false }) || agent;
