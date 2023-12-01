@@ -91,9 +91,9 @@ async function run() {
 
     // Get inputs
     const taskDefinitionFile = core.getInput('task-definition', { required: true });
-    const cluster = core.getInput('cluster', { required: false });
-    const count = core.getInput('count', { required: true });
-    const launchType = core.getInput('launch-type', { required: false }) || "EC2";
+    const cluster = core.getInput('cluster', { required: true });
+    const count = core.getInput('count', { required: false }) || 1;;
+    const launchType = core.getInput('launch-type', { required: false }) || "FARGATE";
     const networkConfig = core.getInput('network-configuration', { required: false }) || null;
     const startedBy = core.getInput('started-by', { required: false }) || agent;
     const waitForFinish = core.getInput('wait-for-finish', { required: false }) || false;

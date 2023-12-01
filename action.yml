@@ -1,5 +1,5 @@
 name: 'Amazon ECS "Run Task" Action'
-author: "Uturn Data Solutions"
+author: "Orchid Surgical"
 description: "Runs a standalone Amazon ECS task (EC2 or Fargate)"
 branding:
   icon: "cloud"
@@ -13,9 +13,11 @@ inputs:
     required: true
   count:
     description: "The count of tasks to run. Will default to the 1"
+    default: '1'
     required: true
   launch-type:
     description: "The infrastructure to run your standalone task on."
+    default: 'FARGATE'
     required: false
   network-configuration:
     description: "The network configuration for the service. This parameter is required for task definitions that use the awsvpc network mode to receive their own elastic network interface, such as those run on Fargate."
