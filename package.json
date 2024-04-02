@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/orchidsurgical/amazon-ecs-run-task",
   "dependencies": {
-    "@actions/core": "^1.6.0",
+    "@actions/core": "^1.10.0",
     "aws-sdk": "^2.1034.0",
     "yaml": "^1.10.2"
   },
