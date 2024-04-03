@@ -6,8 +6,11 @@ branding:
   color: "blue"
 inputs:
   task-definition:
-    description: "The name of ECS task definition"
-    required: true
+    description: "The body of the task definition to be created, if existing-task-definition is not provided."
+    required: false
+  existing-task-definition-arn:
+    description: "ARN of an existing ECS task definition to use. If provided, task-definition will be ignored."
+    required: false
   cluster:
     description: "The name of the ECS cluster. Will default to the 'default' cluster"
     required: true
@@ -33,9 +36,9 @@ inputs:
     required: false
 outputs:
   task-definition-arn:
-    description: "The ARN of the registered ECS task definition"
+    description: "The ARN of the task definition executed."
   task-arn:
     description: "The ARN of the ECS task"
 runs:
-  using: "node12"
+  using: "node20"
   main: "dist/index.js"

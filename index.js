@@ -70,9 +70,9 @@ function removeIgnoredAttributes(taskDef) {
     if (taskDef[attribute]) {
       core.warning(
         `Ignoring property '${attribute}' in the task definition file. ` +
-          "This property is returned by the Amazon ECS DescribeTaskDefinition API and may be shown in the ECS console, " +
-          "but it is not a valid field when registering a new task definition. " +
-          "This field can be safely removed from your task definition file."
+        "This property is returned by the Amazon ECS DescribeTaskDefinition API and may be shown in the ECS console, " +
+        "but it is not a valid field when registering a new task definition. " +
+        "This field can be safely removed from your task definition file."
       );
       delete taskDef[attribute];
     }
@@ -90,43 +90,50 @@ async function run() {
     });
 
     // Get inputs
-    const taskDefinitionFile = core.getInput('task-definition', { required: true });
+    const taskDefinitionFile = core.getInput('task-definition', { required: false });
     const cluster = core.getInput('cluster', { required: true });
     const count = core.getInput('count', { required: false }) || 1;
     const launchType = core.getInput('launch-type', { required: false }) || "FARGATE";
     const networkConfig = core.getInput('network-configuration', { required: false }) || null;
     const startedBy = core.getInput('started-by', { required: false }) || agent;
     const waitForFinish = core.getInput('wait-for-finish', { required: false }) || false;
+    const existingTaskDefArn = core.getInput('existing-task-definition-arn', { required: false });
 
     let waitForMinutes = parseInt(core.getInput('wait-for-minutes', { required: false })) || 30;
     if (waitForMinutes > MAX_WAIT_MINUTES) {
       waitForMinutes = MAX_WAIT_MINUTES;
     }
 
-    // Register the task definition
-    core.debug("Registering the task definition");
-    const taskDefPath = path.isAbsolute(taskDefinitionFile)
-      ? taskDefinitionFile
-      : path.join(process.env.GITHUB_WORKSPACE, taskDefinitionFile);
-    const fileContents = fs.readFileSync(taskDefPath, "utf8");
-    const taskDefContents = removeIgnoredAttributes(
-      cleanNullKeys(yaml.parse(fileContents))
-    );
-
-    let registerResponse;
-    try {
-      registerResponse = await ecs
-        .registerTaskDefinition(taskDefContents)
-        .promise();
-    } catch (error) {
-      core.setFailed(
-        "Failed to register task definition in ECS: " + error.message
+    // Register the task definition if needed
+    let taskDefArn
+    if (!existingTaskDefArn) {
+      core.debug("Registering the task definition");
+      const taskDefPath = path.isAbsolute(taskDefinitionFile)
+        ? taskDefinitionFile
+        : path.join(process.env.GITHUB_WORKSPACE, taskDefinitionFile);
+      const fileContents = fs.readFileSync(taskDefPath, "utf8");
+      const taskDefContents = removeIgnoredAttributes(
+        cleanNullKeys(yaml.parse(fileContents))
       );
-      core.debug("Task definition contents:");
-      core.debug(JSON.stringify(taskDefContents, undefined, 4));
-      throw error;
+
+      let registerResponse;
+      try {
+        registerResponse = await ecs
+          .registerTaskDefinition(taskDefContents)
+          .promise();
+      } catch (error) {
+        core.setFailed(
+          "Failed to register task definition in ECS: " + error.message
+        );
+        core.debug("Task definition contents:");
+        core.debug(JSON.stringify(taskDefContents, undefined, 4));
+        throw error;
+      }
+      taskDefArn = registerResponse.taskDefinition.taskDefinitionArn;
+    } else {
+      core.debug("Using existing task definition: " + existingTaskDefArn);
+      taskDefArn = existingTaskDefArn;
     }
-    const taskDefArn = registerResponse.taskDefinition.taskDefinitionArn;
     core.setOutput('task-definition-arn', taskDefArn);
 
     const clusterName = cluster ? cluster : 'default';
